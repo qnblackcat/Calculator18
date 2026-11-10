@@ -2,7 +2,12 @@
 #import <objc/runtime.h>
 
 #ifdef C18_DEBUG
-#define C18Log(fmt, ...) NSLog(@"[Calculator18] " fmt, ##__VA_ARGS__)
+// Debug.xm: appends a line to Calculator18.log (/var/mobile/tmp, and Calculator's own tmp folder).
+#ifdef __cplusplus
+extern "C"
+#endif
+void C18WriteLog(NSString *message);
+#define C18Log(fmt, ...) do { NSString *c18Message = [NSString stringWithFormat:@"" fmt, ##__VA_ARGS__]; NSLog(@"[Calculator18] %@", c18Message); C18WriteLog(c18Message); } while (0)
 #else
 #define C18Log(...)
 #endif
@@ -18,6 +23,7 @@ enum {
 	C18ButtonSubtract = 7,
 	C18ButtonAdd = 8,
 	C18ButtonEquals = 9,
+	C18ButtonPoint = 10,  // the decimal key where the region's separator is "." (52 where it is ",")
 	C18ButtonDigit0 = 11, // 11...20 are 0...9
 	C18ButtonDigit9 = 20,
 	// Scientific keypad: 21...50 run row by row through iOS 16's landscape layout (the memory keys, 2nd, EE and
@@ -53,7 +59,8 @@ enum {
 	C18ButtonPi = 49,
 	C18ButtonRand = 50,
 	C18ButtonAllClear = 51,
-	C18ButtonDecimal = 52,
+	C18ButtonDecimal = 52,        // the decimal key where the region's separator is "," (10 where it is ".")
+	C18ButtonDeg = 53,            // the Rad key while it reads "Deg"
 	C18ButtonPowerSwapped = 54,   // y^x
 	C18ButtonTwoPower = 55,
 	C18ButtonLogY = 56,           // log base y
@@ -81,6 +88,33 @@ static const NSInteger C18ExpressionTag = 0xC18;   // tag of the small expressio
 static inline NSInteger C18KeyID(UIView *view) {
 	if (![view respondsToSelector:@selector(accessibilityCalculatorButtonID)]) return 0;
 	return [view accessibilityCalculatorButtonID];
+}
+
+// Calculator changes the id of some keys when they show their other face (CalculatorKeypadView's
+// setShowingAlternate:button: and CalculatorButton.shiftedButton in 17.1.1): the decimal key is 10 or 52 depending
+// on the region, Rad/Deg 45 or 53, the clear key 1 or 51, and 2nd swaps the keys below for 54...63. One id per key:
+// the one the layouts use.
+static inline NSInteger C18BaseKeyID(NSInteger identifier) {
+	switch (identifier) {
+		case C18ButtonPoint: return C18ButtonDecimal;
+		case C18ButtonDeg: return C18ButtonRad;
+		case C18ButtonAllClear: return C18ButtonClear;
+		case C18ButtonPowerSwapped: return C18ButtonExp;
+		case C18ButtonTwoPower: return C18ButtonTenPower;
+		case C18ButtonLogY: return C18ButtonLn;
+		case C18ButtonLog2: return C18ButtonLog10;
+		case C18ButtonAsin: return C18ButtonSin;
+		case C18ButtonAcos: return C18ButtonCos;
+		case C18ButtonAtan: return C18ButtonTan;
+		case C18ButtonAsinh: return C18ButtonSinh;
+		case C18ButtonAcosh: return C18ButtonCosh;
+		case C18ButtonAtanh: return C18ButtonTanh;
+	}
+	return identifier;
+}
+
+static inline BOOL C18IsDecimalKey(NSInteger identifier) {
+	return identifier == C18ButtonPoint || identifier == C18ButtonDecimal;
 }
 
 #ifdef __cplusplus

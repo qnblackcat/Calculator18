@@ -154,21 +154,27 @@ static BOOL C18IsPlainOperand(NSString *operand) {
 	return [operand rangeOfCharacterFromSet:[plain invertedSet]].location == NSNotFound;
 }
 
-// The key presses that type `text` (a result), so an expression that continues from it can be typed again.
+// The decimal key Calculator has: 52 ("," key) where the region's separator is a comma, else 10 ("." key).
+static NSInteger C18DecimalKeyForRegion(void) {
+	return [[NSLocale currentLocale].decimalSeparator isEqualToString:@","] ? C18ButtonDecimal : C18ButtonPoint;
+}
+
+// The key presses that type `text` (a result, raw: "." is its decimal point), so an expression that continues from it
+// can be typed again.
 static void C18SeedKeys(NSString *text) {
 	c18KeySeq = [NSMutableArray array];
 	BOOL negative = [text hasPrefix:@"-"];
 	for (NSUInteger i = negative ? 1 : 0; i < text.length; i++) {
 		unichar character = [text characterAtIndex:i];
 		if (character >= '0' && character <= '9') [c18KeySeq addObject:@(C18ButtonDigit0 + (character - '0'))];
-		else if (character == '.') [c18KeySeq addObject:@(C18ButtonDecimal)];
+		else if (character == '.') [c18KeySeq addObject:@(C18DecimalKeyForRegion())];
 		else { c18KeySeq = [NSMutableArray array]; return; }   // "Error", an exponent: cannot be typed
 	}
 	if (negative) [c18KeySeq addObject:@(C18ButtonNegate)];
 }
 
 static BOOL C18IsEntryKey(NSInteger key) {
-	return (key >= C18ButtonDigit0 && key <= C18ButtonDigit9) || key == C18ButtonDecimal || key == C18ButtonNegate;
+	return (key >= C18ButtonDigit0 && key <= C18ButtonDigit9) || C18IsDecimalKey(key) || key == C18ButtonNegate;
 }
 
 // Called before the model handles the key, while c18LastText is still the previous display text.
@@ -188,7 +194,7 @@ void C18Track(NSInteger button) {
 	if (button == C18ButtonAllClear) {
 		C18Reset();
 		c18RepeatOperator = c18RepeatOperand = nil;
-	} else if ((button >= C18ButtonDigit0 && button <= C18ButtonDigit9) || button == C18ButtonDecimal) {
+	} else if ((button >= C18ButtonDigit0 && button <= C18ButtonDigit9) || C18IsDecimalKey(button)) {
 		if (c18ShowingResult) C18Reset();
 		c18Operand = nil;
 		c18Typing = YES;

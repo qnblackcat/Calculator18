@@ -194,7 +194,8 @@ static void C18ShowKey(UIView *key, BOOL shown) {
 	if (!shown) key.frame = CGRectZero;
 }
 
-// Key ids of the basic keypad, row by row (iOS 18 landscape). 1 is the clear key (id 1 or 51), -1 the mode key.
+// Key ids of the basic keypad, row by row (iOS 18 landscape), as C18BaseKeyID gives them (1 is the clear key, 52 the
+// decimal key, whatever they read now). -1 is the mode key.
 static const NSInteger C18BasicLayout[4][5] = {
 	{C18ButtonDigit0 + 7, C18ButtonDigit0 + 8, C18ButtonDigit0 + 9, C18ButtonClear, C18ButtonDivide},
 	{C18ButtonDigit0 + 4, C18ButtonDigit0 + 5, C18ButtonDigit0 + 6, C18ButtonNegate, C18ButtonMultiply},
@@ -246,14 +247,13 @@ static void C18RedrawHighlight(UIView *key) {
 	}
 }
 
-// Puts the key with `identifier` at `frame` (-1 is the calculator key). The clear key is id 1 or 51.
+// Puts the key with `identifier` at `frame` (-1 is the calculator key). `keys` are by C18BaseKeyID.
 static void C18PlaceKey(UIView *keypad, NSDictionary<NSNumber *, UIView *> *keys, NSInteger identifier, CGRect frame, NSMutableSet<UIView *> *placed) {
 	if (identifier == -1) {
 		C18PlaceModeKey(keypad, frame, keys[@(C18ButtonDigit0)]);
 		return;
 	}
 	UIView *key = keys[@(identifier)];
-	if (identifier == C18ButtonClear && !key) key = keys[@(C18ButtonAllClear)];
 	if (!key) return;
 	key.frame = frame;
 	C18RedrawHighlight(key);
@@ -291,7 +291,7 @@ void C18LayoutKeypad(UIView *keypad) {
 
 	NSMutableDictionary<NSNumber *, UIView *> *keys = [NSMutableDictionary dictionary];
 	for (UIView *subview in keypad.subviews) {
-		NSInteger identifier = C18KeyID(subview);
+		NSInteger identifier = C18BaseKeyID(C18KeyID(subview));
 		if (identifier) keys[@(identifier)] = subview;
 	}
 	C18LayoutPortraitModeKey(keypad, keys);
@@ -350,13 +350,13 @@ static const CGFloat C18LandscapeLabelRatio = 0.55;             // label font si
 static const CGFloat C18LandscapeOperatorLabelRatio = 0.62;     // + - x / = a little larger
 
 static BOOL C18IsBasicKey(NSInteger identifier) {
-	return (identifier >= C18ButtonDigit0 && identifier <= C18ButtonDigit9) || identifier == C18ButtonClear || identifier == C18ButtonAllClear ||
+	return (identifier >= C18ButtonDigit0 && identifier <= C18ButtonDigit9) || identifier == C18ButtonClear ||
 		identifier == C18ButtonNegate || identifier == C18ButtonPercent || identifier == C18ButtonDecimal ||
 		(identifier >= C18ButtonDivide && identifier <= C18ButtonEquals);
 }
 
 void C18AdjustKeyLabels(UIView *key) {
-	NSInteger identifier = C18KeyID(key);
+	NSInteger identifier = C18BaseKeyID(C18KeyID(key));
 	if (!C18IsBasicKey(identifier)) return;
 	BOOL scale = C18IsLandscape(key) && c18ScientificMode;
 	BOOL isOperator = identifier >= C18ButtonDivide && identifier <= C18ButtonEquals;
