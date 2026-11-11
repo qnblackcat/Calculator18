@@ -21,7 +21,6 @@ make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
 
 ```
-Add `CALCULATOR18_DEBUG=1` for a debug build that logs the keypad layout.
 
 </details>
 
