@@ -178,8 +178,33 @@ static void C18SetPortraitScientific(BOOL scientific, UIView *anchor) {
 	C18LayoutWindowNow(window);
 }
 
+// Calculator just started: shows the keypad chosen in Settings. The landscape flag is set either way, so turning
+// the phone keeps the mode; the portrait keypad is only swapped when it differs.
+void C18ApplyStartupKeypad(BOOL scientific, UIView *anchor) {
+	c18ScientificMode = scientific;
+	if (C18IsLandscape(anchor)) C18SetLandscapeScientific(scientific, anchor);
+	else if (C18ScientificNow(anchor) != scientific) C18SetPortraitScientific(scientific, anchor);
+}
+
+// A tap of the strength chosen in Settings, when Haptic Feedback is on.
+void C18Haptic(void) {
+	C18HapticState state = C18PrefHaptic();
+	if (state == C18HapticStateOff) return;
+	static UIFeedbackGenerator *generator;
+	static C18HapticState generatorState;
+	if (!generator || generatorState != state) {
+		generatorState = state;
+		static const UIImpactFeedbackStyle styles[] = {UIImpactFeedbackStyleSoft, UIImpactFeedbackStyleLight, UIImpactFeedbackStyleMedium, UIImpactFeedbackStyleHeavy};
+		generator = state == C18HapticStateSelection ? [UISelectionFeedbackGenerator new] : [[UIImpactFeedbackGenerator alloc] initWithStyle:styles[state - C18HapticStateSoft]];
+	}
+	if (state == C18HapticStateSelection) [(UISelectionFeedbackGenerator *)generator selectionChanged];
+	else [(UIImpactFeedbackGenerator *)generator impactOccurred];
+	[generator prepare];
+}
+
 // `anchor` is the key that was used: c18Keypad is only known after the first key press.
 void C18SelectKeypad(BOOL scientific, BOOL landscape, UIView *anchor) {
+	C18Haptic();
 	if (landscape) C18SetLandscapeScientific(scientific, anchor);
 	else C18SetPortraitScientific(scientific, anchor);
 }

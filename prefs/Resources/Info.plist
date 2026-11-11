@@ -1,0 +1,11 @@
+{
+    CFBundleDevelopmentRegion = English;
+    CFBundleExecutable = Calculator18Prefs;
+    CFBundleIdentifier = "com.qn.calculator18.prefs";
+    CFBundleInfoDictionaryVersion = "6.0";
+    CFBundlePackageType = BNDL;
+    CFBundleShortVersionString = "1.0.1";
+    CFBundleSignature = "????";
+    CFBundleVersion = "1.0";
+    NSPrincipalClass = C18RootListController;
+}

@@ -61,7 +61,13 @@ static UIButton *C18ModeButton(UIView *keypad) {
 	button.tag = C18ModeKeyTag;
 	button.accessibilityLabel = @"Calculator";
 	button.tintColor = [UIColor whiteColor];
-	button.showsMenuAsPrimaryAction = YES;
+	// With quick switch on a tap changes the keypad and holding the key shows the menu (showsMenuAsPrimaryAction,
+	// set with the style, says which).
+	__weak UIButton *weakButton = button;
+	[button addAction:[UIAction actionWithHandler:^(UIAction *action) {
+		UIButton *key = weakButton;
+		if (key && C18PrefQuickSwitch()) C18SelectKeypad(!C18ScientificNow(key), C18IsLandscape(key), key);
+	}] forControlEvents:UIControlEventTouchUpInside];
 	[keypad addSubview:button];
 	return button;
 }
@@ -73,6 +79,7 @@ static void C18StyleModeButton(UIButton *button, CGRect frame, UIColor *color) {
 	UIImage *icon = C18CalculatorIcon(frame.size.height);
 	if ([button imageForState:UIControlStateNormal] != icon) [button setImage:icon forState:UIControlStateNormal];
 	button.hidden = NO;
+	button.showsMenuAsPrimaryAction = !C18PrefQuickSwitch();
 
 	// The menu shows which mode is current, so only rebuild it when that changes (not while it may be open).
 	static const void *stateKey = &stateKey;

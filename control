@@ -1,7 +1,7 @@
 Package: com.qn.calculator18
 Name: Calculator18
-Depends: mobilesubstrate, firmware (>= 15.0), firmware (<< 18.0)
-Version: 1.0.1
+Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0), firmware (<< 18.0)
+Version: 1.1.0
 Architecture: iphoneos-arm
 Description: iOS 18 Calculator features for iOS 15 and later
 Maintainer: Qn <qnblackcat@gmail.com>

@@ -1,16 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-#ifdef C18_DEBUG
-// Debug.xm: appends a line to Calculator18.log (/var/mobile/tmp, and Calculator's own tmp folder).
-#ifdef __cplusplus
-extern "C"
-#endif
-void C18WriteLog(NSString *message);
-#define C18Log(fmt, ...) do { NSString *c18Message = [NSString stringWithFormat:@"" fmt, ##__VA_ARGS__]; NSLog(@"[Calculator18] %@", c18Message); C18WriteLog(c18Message); } while (0)
-#else
-#define C18Log(...)
-#endif
+#import "Calculator18Log.h"
+#import "Calculator18Prefs.h"
 
 // Values of CalculatorModel's buttonPressed: argument, read from the debug log on 16.3.1.
 enum {
@@ -151,6 +143,8 @@ UIViewController *C18KeypadController(UIView *anchor);
 NSArray<UIView *> *C18AllKeypads(UIView *anchor);
 BOOL C18ScientificNow(UIView *view);
 void C18SelectKeypad(BOOL scientific, BOOL landscape, UIView *anchor);
+void C18Haptic(void);   // every key press and keypad switch, when Haptic Feedback is on
+void C18ApplyStartupKeypad(BOOL scientific, UIView *anchor);   // once, when Calculator starts
 void C18AdjustDisplayHeight(UIView *root);
 void C18RelayoutWindow(UIWindow *window);
 void C18LayoutKeypad(UIView *keypad);   // also places the portrait calculator key
@@ -165,12 +159,8 @@ void C18LayoutPortraitModeKey(UIView *keypad, NSDictionary<NSNumber *, UIView *>
 void C18OpenNewNote(void);
 void C18ListenForNewNote(void);
 
-// Debug.m: layout dumps, in debug builds only.
-#ifdef C18_DEBUG
+// Debug.xm: layout dumps, while Debug is on.
 void C18DebugKeypadLayout(UIView *keypad);
-#else
-#define C18DebugKeypadLayout(keypad)
-#endif
 
 #ifdef __cplusplus
 }

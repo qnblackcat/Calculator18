@@ -21,6 +21,7 @@
 %hook _TtC10Calculator15CalculatorModel
 
 - (void)buttonPressed:(NSInteger)button {
+	if (button != C18ButtonDelete) C18Haptic();   // the swipe on the display is not a key
 	if (C18InterceptKey(self, &button)) return;
 	C18Log(@"buttonPressed: %ld", (long)button);
 	C18Track(button);
@@ -72,6 +73,17 @@
 %end
 
 %hook _TtC10Calculator20KeypadViewController
+
+// The keypad chosen in Settings, only when Calculator starts (not when it comes back from the background).
+- (void)viewDidAppear:(BOOL)animated {
+	%orig;
+	static dispatch_once_t once;
+	dispatch_once(&once, ^{
+		BOOL scientific = C18PrefStartupScientific();
+		C18Log(@"startup keypad: %@", scientific ? @"scientific" : @"basic");
+		C18ApplyStartupKeypad(scientific, ((UIViewController *)self).view);
+	});
+}
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
 	c18Rotating = YES;
@@ -132,8 +144,9 @@
 
 %ctor {
 	if ([[[NSBundle mainBundle] bundleIdentifier] isEqualToString:@"com.apple.springboard"]) {
+		C18PublishPrefs();
 		C18ListenForNewNote();
-	} else {
+	} else if (C18PrefEnabled()) {
 		%init(CalculatorApp);
 	}
 }

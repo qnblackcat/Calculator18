@@ -1,0 +1,10 @@
+{
+    entry = {
+        bundle = Calculator18Prefs;
+        cell = PSLinkCell;
+        detail = C18RootListController;
+        icon = "icon.png";
+        isController = 1;
+        label = Calculator18;
+    };
+}

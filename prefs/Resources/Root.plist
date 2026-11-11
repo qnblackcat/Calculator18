@@ -1,0 +1,104 @@
+{
+    title = Calculator18;
+    items = (
+        {
+            cell = PSGroupCell;
+            footerText = "・Relaunch Calculator after changing Enabled or Startup Keypad.";
+        },
+        {
+            cell = PSSwitchCell;
+            label = "✅ Enabled";
+            default = 1;
+            defaults = "com.qn.calculator18";
+            key = enabled;
+        },
+
+        {
+            cell = PSGroupCell;
+            label = "⌨️ Keypad";
+            footerText = "・Startup Keypad: the keypad Calculator opens with, in portrait and landscape. It only applies when Calculator is launched.\n・Quick Switch: tapping the calculator key switches directly between the Basic and the Scientific keypad. Hold the key to show the menu.\n・Haptic Feedback: a tap on every key press, including the calculator key. The strength goes from Extra Light to Strong.";
+        },
+        {
+            cell = PSLinkListCell;
+            detail = PSListItemsController;
+            id = startupMode;
+            label = "Startup Keypad";
+            default = basic;
+            defaults = "com.qn.calculator18";
+            key = startupMode;
+            validTitles = ( Basic, Scientific );
+            shortTitles = ( Basic, Scientific );
+            validValues = ( basic, scientific );
+        },
+        {
+            cell = PSSwitchCell;
+            id = quickSwitch;
+            label = "Quick Switch";
+            default = 0;
+            defaults = "com.qn.calculator18";
+            key = quickSwitch;
+        },
+        {
+            cell = PSSwitchCell;
+            id = haptic;
+            label = "Haptic Feedback";
+            default = 0;
+            defaults = "com.qn.calculator18";
+            key = haptic;
+        },
+        {
+            cell = PSSegmentCell;
+            id = hapticStrength;
+            default = light;
+            defaults = "com.qn.calculator18";
+            key = hapticStrength;
+            validValues = ( selection, soft, light, medium, heavy );
+            validTitles = ( "Extra Light", Soft, Light, Medium, Strong );
+            shortTitles = ( "Extra Light", Soft, Light, Medium, Strong );
+        },
+
+        {
+            cell = PSGroupCell;
+            label = "🛠️ Troubleshooting";
+            footerText = "・Debug: logs what the tweak does and also writes the log to a file on this device (about 128 KB per process) so you can copy it into a bug report.";
+        },
+        {
+            cell = PSSwitchCell;
+            label = "Debug";
+            default = 0;
+            defaults = "com.qn.calculator18";
+            key = debug;
+        },
+        {
+            cell = PSButtonCell;
+            label = "Copy Debug Log";
+            action = copyDebugLog;
+        },
+        {
+            cell = PSButtonCell;
+            label = "Clear Debug Log";
+            action = clearDebugLog;
+        },
+
+        {
+            cell = PSGroupCell;
+            label = "ℹ️ About";
+            footerText = "© 2026 Qn (Đạt Nguyễn)\nLicensed under GNU GPLv3";
+        },
+        {
+            cell = PSTitleValueCell;
+            label = "Version";
+            get = tweakVersion:;
+        },
+        {
+            cell = PSButtonCell;
+            label = "Source Code";
+            action = openSourceCode:;
+        },
+        {
+            cell = PSButtonCell;
+            label = "Twitter";
+            action = openTwitter:;
+        }
+    );
+}

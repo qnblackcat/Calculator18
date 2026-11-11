@@ -2,32 +2,7 @@
 #import <substrate.h>
 #import <unistd.h>
 
-// Debug builds log the keypad and the display each time the orientation changes, to see how Calculator lays them out.
-
-#ifdef C18_DEBUG
-// Logs to /var/mobile/tmp like the other tweaks; Calculator's own tmp folder is the fallback in case the sandbox refuses.
-void C18WriteLog(NSString *message) {
-	static dispatch_queue_t queue;
-	static NSArray<NSString *> *paths;
-	static NSDateFormatter *formatter;
-	static dispatch_once_t once;
-	dispatch_once(&once, ^{
-		queue = dispatch_queue_create("com.qn.calculator18.log", DISPATCH_QUEUE_SERIAL);
-		paths = @[@"/var/mobile/tmp/Calculator18.log", [NSTemporaryDirectory() stringByAppendingPathComponent:@"Calculator18.log"]];
-		formatter = [[NSDateFormatter alloc] init];
-		formatter.dateFormat = @"yyyy-MM-dd HH:mm:ss.SSS";
-	});
-	NSString *line = [NSString stringWithFormat:@"%@ [%@:%d] %@\n", [formatter stringFromDate:[NSDate date]], NSProcessInfo.processInfo.processName, getpid(), message];
-	dispatch_async(queue, ^{
-		NSData *data = [line dataUsingEncoding:NSUTF8StringEncoding];
-		for (NSString *path in paths) {
-			FILE *file = fopen(path.fileSystemRepresentation, "a");
-			if (!file) continue;
-			fwrite(data.bytes, 1, data.length, file);
-			fclose(file);
-		}
-	});
-}
+// While Debug is on, logs the keypad and the display each time the orientation changes, to see how Calculator lays them out.
 
 static void C18DumpKey(UIView *view, int depth) {
 	NSInteger identifier = C18KeyID(view);
@@ -97,10 +72,10 @@ static void C18DumpOrientation(UIView *keypad) {
 // Calculator builds a second, empty one).
 void C18DebugKeypadLayout(UIView *keypad) {
 	static int lastLandscape = -1;
+	if (!C18DebugEnabled()) return;
 	if (!keypad.subviews.count || keypad.bounds.size.width <= 0 || !keypad.window) return;
 	int landscape = keypad.window.bounds.size.width > keypad.window.bounds.size.height;
 	if (landscape == lastLandscape) return;
 	lastLandscape = landscape;
 	C18DumpOrientation(keypad);
 }
-#endif
